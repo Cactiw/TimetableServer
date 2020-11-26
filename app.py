@@ -34,4 +34,4 @@ def get_pairs(group_id: int, db: Session = Depends(get_db)):
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=6000, log_level="info")
+    uvicorn.run("app:app", host="0.0.0.0", port=6000, log_level="info")
