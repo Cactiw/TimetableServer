@@ -28,5 +28,10 @@ def get_pairs(db: Session = Depends(get_db)):
     return db.query(Pair).all()
 
 
+@app.get("/pairs/by_group/{group_id}")
+def get_pairs(group_id: int, db: Session = Depends(get_db)):
+    return db.query(Pair).filter_by(group_id=group_id).all()
+
+
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=5000, log_level="info")
+    uvicorn.run("app:app", host="127.0.0.1", port=6000, log_level="info")
