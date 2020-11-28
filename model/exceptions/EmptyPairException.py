@@ -1,0 +1,3 @@
+
+class EmptyPairException(Exception):
+    pass

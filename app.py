@@ -6,9 +6,12 @@ from sqlalchemy.orm import Session
 
 from model.models import Pair
 
+from service.parser import parse_xls
+
 from database import SessionMaker
 
 import uvicorn
+import base64
 
 
 app = FastAPI()
@@ -31,6 +34,13 @@ def get_pairs(db: Session = Depends(get_db)):
 @app.get("/pairs/by_group/{group_id}")
 def get_pairs(group_id: int, db: Session = Depends(get_db)):
     return db.query(Pair).filter_by(group_id=group_id).all()
+
+
+@app.post('/parseXls')
+def parseXls(file: str):
+    file = base64.b64decode(file)
+    result = parse_xls(file)
+    return {"result": "ok", "code": 200, "timetable": result}
 
 
 if __name__ == "__main__":
