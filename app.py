@@ -1,7 +1,7 @@
 
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from model.models import Pair
@@ -37,8 +37,9 @@ def get_pairs(group_id: int, db: Session = Depends(get_db)):
 
 
 @app.post('/parseXls')
-def parseXls(file: str):
-    file = base64.b64decode(file)
+async def parseXls(request: Request):
+    json = await request.json()
+    file = base64.b64decode(json['file'])
     result = parse_xls(file)
     return {"result": "ok", "code": 200, "timetable": result}
 
