@@ -4,7 +4,9 @@ from typing import List
 from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from model.models import Pair
+from model.Pair import Pair, PairOutModel
+from model.User import User
+from model.Auditorium import Auditorium
 
 from service.parser import parse_xls
 
@@ -31,8 +33,8 @@ def get_pairs(db: Session = Depends(get_db)):
     return db.query(Pair).all()
 
 
-@app.get("/pairs/by_group/{group_id}")
-def get_pairs(group_id: int, db: Session = Depends(get_db)):
+@app.get("/pairs/by_group/{group_id}", response_model=List[PairOutModel])
+def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
     return db.query(Pair).filter_by(group_id=group_id).all()
 
 
