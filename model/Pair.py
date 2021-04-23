@@ -4,13 +4,14 @@ from sqlalchemy.orm import relationship
 
 from pydantic import BaseModel
 
-from typing import List
+from typing import List, Optional
 
 import datetime
 
 from database import Base
 
 from model.User import UserOutModel
+from model.Auditorium import AuditoriumOutModel
 
 
 metadata = Base.metadata
@@ -28,6 +29,7 @@ class PairModel(BaseModel):
 class PairOutModel(PairModel):
     id: int
     teacher: UserOutModel
+    auditorium: Optional[AuditoriumOutModel]
     # pair_to_change: List['PairOutModel'] = []
 
 

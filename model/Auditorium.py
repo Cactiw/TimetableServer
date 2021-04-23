@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 from pydantic import BaseModel
 
-from typing import List
+from typing import List, Optional
 
 import datetime
 
@@ -18,7 +18,7 @@ metadata = Base.metadata
 
 class AuditoriumModel(BaseModel):
     name: str
-    additional: dict
+    additional: Optional[dict]
     max_students: int
 
     class Config:
