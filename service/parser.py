@@ -99,7 +99,7 @@ def parse_pair(pair_data: list) -> dict:
 
 def make_dict(pair_time, pair_subject, pair_teacher, pair_auditorium, pair_subject_merged: bool = False) -> dict:
     return {
-        "time": pair_time, "subject": " ".join(pair_subject.split()).strip(),
+        "time": pair_time.replace(".", ":"), "subject": " ".join(pair_subject.split()).strip(),
         "teacher": pair_teacher.strip(), "pair_auditorium": pair_auditorium,
         "merged": pair_subject_merged
     }
