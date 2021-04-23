@@ -16,7 +16,7 @@ metadata = Base.metadata
 
 
 class UserModel(BaseModel):
-    email: str
+    email: Optional[str]
     name: str
     last_name: str
     sur_name: str
