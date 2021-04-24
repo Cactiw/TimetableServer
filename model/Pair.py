@@ -30,6 +30,7 @@ class PairOutModel(PairModel):
     id: int
     teacher: UserOutModel
     auditorium: Optional[AuditoriumOutModel]
+    day_of_week: int
     # pair_to_change: List['PairOutModel'] = []
 
 
@@ -51,3 +52,7 @@ class Pair(Base):
     group = relationship('PeopleUnion')
     pair_to_change = relationship('Pair', remote_side=[id])
     teacher = relationship('User')
+
+    @property
+    def day_of_week(self) -> int:
+        return self.begin_time.weekday()
