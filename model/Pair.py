@@ -31,6 +31,8 @@ class PairOutModel(PairModel):
     teacher: UserOutModel
     auditorium: Optional[AuditoriumOutModel]
     day_of_week: int
+    begin_clear_time: str
+    end_clear_time: str
     # pair_to_change: List['PairOutModel'] = []
 
 
@@ -56,3 +58,12 @@ class Pair(Base):
     @property
     def day_of_week(self) -> int:
         return self.begin_time.weekday()
+
+    @property
+    def begin_clear_time(self) -> str:
+        return self.begin_time.strftime("%H:%M")
+
+    @property
+    def end_clear_time(self) -> str:
+        return self.end_time.strftime("%H:%M")
+
