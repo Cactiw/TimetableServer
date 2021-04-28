@@ -29,7 +29,7 @@ class PairModel(BaseModel):
 
 class PairOutModel(PairModel):
     id: int
-    teacher: UserOutModel
+    teacher: Optional[UserOutModel]
     auditorium: Optional[AuditoriumOutModel]
     group: PeopleUnionOutModel
     day_of_week: int
