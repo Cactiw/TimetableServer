@@ -22,7 +22,7 @@ class PeopleUnionModel(BaseModel):
 class PeopleUnionOutModel(PeopleUnionModel):
     id: int
     type: PeopleUnionTypeOutModel
-    parent: Optional['PeopleUnionTypeModel']
+    # parent: Optional['PeopleUnionTypeModel']
 
 
 class PeopleUnion(Base):

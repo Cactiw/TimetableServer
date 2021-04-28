@@ -12,6 +12,7 @@ from database import Base
 
 from model.User import UserOutModel
 from model.Auditorium import AuditoriumOutModel
+from model.PeopleUnion import PeopleUnionOutModel
 
 
 metadata = Base.metadata
@@ -30,6 +31,7 @@ class PairOutModel(PairModel):
     id: int
     teacher: UserOutModel
     auditorium: Optional[AuditoriumOutModel]
+    group: PeopleUnionOutModel
     day_of_week: int
     begin_clear_time: str
     end_clear_time: str
