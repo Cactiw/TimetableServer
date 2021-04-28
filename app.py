@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from model.Pair import Pair, PairOutModel
+from model.PeopleUnion import PeopleUnion
 from model.User import User
 from model.Auditorium import Auditorium
 
@@ -36,6 +37,16 @@ def get_pairs(db: Session = Depends(get_db)):
 @app.get("/pairs/by_group/{group_id}", response_model=List[PairOutModel])
 def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
     return db.query(Pair).filter_by(group_id=group_id).all()
+
+
+@app.get("/pairs/by_group/all/{group_id}", response_model=List[PairOutModel])
+def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
+    group: PeopleUnion = db.query(PeopleUnion).get(group_id)
+    result = []
+    while group is not None:
+        result += db.query(Pair).filter_by(group_id=group.id).all()
+        group = group.parent
+    return result
 
 
 @app.post('/parseXls')
