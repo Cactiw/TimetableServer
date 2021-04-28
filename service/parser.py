@@ -9,6 +9,12 @@ import re
 import pprint as pp
 
 
+DELETE_TEACHER_WORDS = {
+    "доцент", "профессор"
+}
+teacher_regex = re.compile(r'\b%s\b' % r'\b|\b'.join(map(re.escape, DELETE_TEACHER_WORDS)))
+
+
 def get_book_by_path(path):
     return xlrd.open_workbook(path, formatting_info=True)
 
@@ -98,6 +104,8 @@ def parse_pair(pair_data: list) -> dict:
 
 
 def make_dict(pair_time, pair_subject, pair_teacher, pair_auditorium, pair_subject_merged: bool = False) -> dict:
+    if pair_teacher:
+        pair_teacher = teacher_regex.sub("", pair_teacher).replace("  ", " ").strip()
     return {
         "time": pair_time.replace(".", ":"), "subject": " ".join(pair_subject.split()).strip(),
         "teacher": pair_teacher.strip(), "pair_auditorium": pair_auditorium,
