@@ -35,7 +35,10 @@ class PairOutModel(PairModel):
     day_of_week: int
     begin_clear_time: str
     end_clear_time: str
-    # pair_to_change: List['PairOutModel'] = []
+    pair_to_change: Optional[List['PairOutModel']] = []
+
+
+PairOutModel.update_forward_refs()
 
 
 class Pair(Base):

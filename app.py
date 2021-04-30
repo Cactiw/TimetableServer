@@ -9,24 +9,15 @@ from model.PeopleUnion import PeopleUnion
 from model.User import User
 from model.Auditorium import Auditorium
 
+from routes.user import generate_token
+
 from service.parser import parse_xls
 
-from database import SessionMaker
+from database import get_db
+from service.globals import app
 
 import uvicorn
 import base64
-
-
-app = FastAPI()
-
-
-# Dependency
-def get_db():
-    db = SessionMaker()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.get("/pairs")

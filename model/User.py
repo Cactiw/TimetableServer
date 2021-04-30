@@ -3,6 +3,8 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text
 from sqlalchemy.orm import relationship
 
+from passlib.hash import bcrypt
+
 from pydantic import BaseModel
 
 from typing import Optional
@@ -26,6 +28,20 @@ class UserModel(BaseModel):
         orm_mode = True
 
 
+class NewUserModel(UserModel):
+    password: str
+    clear_password: str
+
+
+class GeneratePasswordModel(BaseModel):
+    email: str
+
+
+class LoginUserModel(BaseModel):
+    email: str
+    password: str
+
+
 class UserOutModel(UserModel):
     id: int
     fullname: str
@@ -38,6 +54,8 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     additional = Column(JSON)
     email = Column(String(255))
+    password = Column(String(64))
+    clear_password = Column(String(64))  # Always None
     last_name = Column(String(255))
     name = Column(String(255))
     role = Column(Integer)
@@ -50,6 +68,14 @@ class User(Base):
     @property
     def fullname(self) -> str:
         return "{} {}{}".format(self.last_name, self.name, " {}".format(self.sur_name) if self.sur_name else "")
+
+    def set_password(self, password: str):
+        self.password = bcrypt.hash(password)
+
+    def verify_password(self, password: str) -> bool:
+        if not self.password:
+            return False
+        return bcrypt.verify(password, self.password)
 
 
 t_people_union_users = Table(
