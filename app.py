@@ -10,6 +10,7 @@ from model.User import User
 from model.Auditorium import Auditorium
 
 from routes.user import generate_token
+from routes.pairs import get_pairs
 
 from service.parser import parse_xls
 
@@ -18,26 +19,6 @@ from service.globals import app
 
 import uvicorn
 import base64
-
-
-@app.get("/pairs")
-def get_pairs(db: Session = Depends(get_db)):
-    return db.query(Pair).all()
-
-
-@app.get("/pairs/by_group/{group_id}", response_model=List[PairOutModel])
-def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
-    return db.query(Pair).filter_by(group_id=group_id).all()
-
-
-@app.get("/pairs/by_group/all/{group_id}", response_model=List[PairOutModel])
-def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
-    group: PeopleUnion = db.query(PeopleUnion).get(group_id)
-    result = []
-    while group is not None:
-        result += db.query(Pair).filter_by(group_id=group.id).all()
-        group = group.parent
-    return result
 
 
 @app.post('/parseXls')

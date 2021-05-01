@@ -55,6 +55,10 @@ class UserLoggedInModel(UserOutModel):
 class User(Base):
     __tablename__ = 'users'
 
+    OPERATOR = 0
+    TEACHER = 1
+    STUDENT = 2
+
     id = Column(Integer, primary_key=True)
     additional = Column(JSON)
     email = Column(String(255))
