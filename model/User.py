@@ -48,6 +48,10 @@ class UserOutModel(UserModel):
     group: Optional[PeopleUnionOutModel]
 
 
+class UserLoggedInModel(UserOutModel):
+    token: Optional[str]
+
+
 class User(Base):
     __tablename__ = 'users'
 

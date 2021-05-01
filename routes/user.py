@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from model.Pair import Pair, PairOutModel
 from model.PeopleUnion import PeopleUnion
-from model.User import User, NewUserModel, LoginUserModel, GeneratePasswordModel
+from model.User import User, NewUserModel, LoginUserModel, GeneratePasswordModel, UserLoggedInModel
 from model.Auditorium import Auditorium
 
 from service.auth import generate_token
@@ -31,12 +31,12 @@ async def generate_password(model: GeneratePasswordModel, db: Session = Depends(
     return user
 
 
-@app.post('/users/login')
+@app.post('/users/login', response_model=UserLoggedInModel)
 async def login(model: LoginUserModel, db: Session = Depends(get_db), auth: AuthJWT = Depends()):
-    token = await generate_token(model, db, auth)
-    return {
-        "token": token
-    }
+    token, user = await generate_token(model, db, auth)
+    model = UserLoggedInModel.from_orm(user)
+    model.token = token
+    return model
 
 
 
