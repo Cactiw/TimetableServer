@@ -35,7 +35,7 @@ def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutM
     return result
 
 
-@app.get("/pairs/timetable")
+@app.get("/pairs/timetable", response_model=List[PairOutModel])
 def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role == user.STUDENT:
         return get_all_pairs(user.group_id, db)
