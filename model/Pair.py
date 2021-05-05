@@ -35,10 +35,10 @@ class PairOutModel(PairModel):
     day_of_week: int
     begin_clear_time: str
     end_clear_time: str
-    pair_to_change: Optional[List['PairOutModel']] = []
 
 
-PairOutModel.update_forward_refs()
+class PairOutWithChangesModel(PairOutModel):
+    changes: Optional[List['PairOutModel']] = []
 
 
 class Pair(Base):
@@ -57,7 +57,7 @@ class Pair(Base):
 
     auditorium = relationship('Auditorium')
     group = relationship('PeopleUnion')
-    pair_to_change = relationship('Pair', remote_side=[id])
+    pair_to_change = relationship('Pair', remote_side=[id], backref="changes")
     teacher = relationship('User')
 
     @property

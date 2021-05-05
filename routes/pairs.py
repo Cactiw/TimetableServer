@@ -4,7 +4,7 @@ from typing import List
 from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from model.Pair import Pair, PairOutModel
+from model.Pair import Pair, PairOutModel, PairOutWithChangesModel
 from model.PeopleUnion import PeopleUnion
 from model.User import User
 from model.Auditorium import Auditorium
@@ -20,12 +20,12 @@ def get_pairs(db: Session = Depends(get_db)):
     return db.query(Pair).all()
 
 
-@app.get("/pairs/by_group/{group_id}", response_model=List[PairOutModel])
+@app.get("/pairs/by_group/{group_id}", response_model=List[PairOutWithChangesModel])
 def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
     return db.query(Pair).filter_by(group_id=group_id).all()
 
 
-@app.get("/pairs/by_group/all/{group_id}", response_model=List[PairOutModel])
+@app.get("/pairs/by_group/all/{group_id}", response_model=List[PairOutWithChangesModel])
 def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
     group: PeopleUnion = db.query(PeopleUnion).get(group_id)
     result = []
@@ -35,7 +35,7 @@ def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutM
     return result
 
 
-@app.get("/pairs/timetable", response_model=List[PairOutModel])
+@app.get("/pairs/timetable", response_model=List[PairOutWithChangesModel])
 def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role == user.STUDENT:
         return get_all_pairs(user.group_id, db)
