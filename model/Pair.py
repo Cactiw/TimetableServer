@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text, Date
 from sqlalchemy.orm import relationship
 
 from pydantic import BaseModel
@@ -36,6 +36,8 @@ class PairOutModel(PairModel):
     begin_clear_time: str
     end_clear_time: str
 
+    change_date: Optional[datetime.date]
+
 
 class PairOutWithChangesModel(PairOutModel):
     changes: Optional[List['PairOutModel']] = []
@@ -54,6 +56,7 @@ class Pair(Base):
     teacher_id = Column(ForeignKey('users.id'))
     group_id = Column(ForeignKey('people_union.id'))
     pair_time_pattern = Column(String(255))
+    change_date = Column(Date)
 
     auditorium = relationship('Auditorium')
     group = relationship('PeopleUnion')
