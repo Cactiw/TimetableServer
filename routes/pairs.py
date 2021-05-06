@@ -1,11 +1,11 @@
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.sql import and_, not_
 from sqlalchemy.orm import Session
 
-from model.Pair import Pair, PairOutModel, PairOutWithChangesModel
+from model.Pair import Pair, PairOutModel, PairOutWithChangesModel, CancelPairModel, CancelPairResponseModel
 from model.PeopleUnion import PeopleUnion
 from model.User import User
 from model.Auditorium import Auditorium
@@ -14,6 +14,8 @@ from database import get_db
 from service.auth import get_current_user
 
 from service.globals import app
+
+import datetime
 
 
 @app.get("/pairs")
@@ -47,4 +49,26 @@ def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_curren
         return get_all_pairs(user.group_id, db)
     elif user.role == user.TEACHER:
         return get_teacher_pairs(user, db)
+
+
+@app.post("/pairs/cancel", response_model=CancelPairResponseModel)
+def cancel_pair(model: CancelPairModel,
+                db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if user.role not in frozenset({user.TEACHER, user.OPERATOR}):
+        raise HTTPException(403, {"error": "This methods requires additional rights."})
+    pair: Pair = db.query(Pair).get(model.pair_id)
+    if not pair:
+        raise HTTPException(404, {"error": "Pair not found."})
+    if user.role == user.TEACHER and pair.teacher != user:
+        raise HTTPException(403, {"error": "You can not cancel a class that isn't yours."})
+    if pair.begin_time.weekday() != model.pair_date.weekday():
+        raise HTTPException(409, {"error": "Cancel date do not match pair date."})
+    if pair.is_canceled:
+        db.delete(pair)
+        db.commit()
+        return {"ok": True, "result": "Cancel change deleted!"}
+    cancel = pair.cancel_pair(model.pair_date)
+    db.add(cancel)
+    db.commit()
+    return {"ok": True, "result": "Class canceled!", "cancel_data": cancel}
 

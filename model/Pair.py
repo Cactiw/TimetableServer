@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text, Date, BOOLEAN
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text, Date, BOOLEAN, Sequence
 from sqlalchemy.orm import relationship
 
 from pydantic import BaseModel
@@ -45,10 +45,21 @@ class PairOutWithChangesModel(PairOutModel):
     pair_to_change: Optional[PairOutModel]
 
 
+class CancelPairModel(BaseModel):
+    pair_id: int
+    pair_date: datetime.date
+
+
+class CancelPairResponseModel(BaseModel):
+    ok: bool
+    result: Optional[str]
+    cancel_data: Optional[PairOutWithChangesModel]
+
+
 class Pair(Base):
     __tablename__ = 'pair'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Sequence('hibernate_sequence'), primary_key=True)
     begin_time = Column(DateTime)
     end_time = Column(DateTime)
     repeatability = Column(Integer, server_default=text("0"))
@@ -77,4 +88,12 @@ class Pair(Base):
     @property
     def end_clear_time(self) -> str:
         return self.end_time.strftime("%H:%M")
+
+    def cancel_pair(self, cancel_date: datetime.date) -> 'Pair':
+        cancel = Pair(begin_time=datetime.datetime.combine(cancel_date, self.begin_time.time()), end_time=self.end_time,
+                      subject=self.subject, auditorium=self.auditorium, teacher=self.teacher, group=self.group,
+                      change_date=cancel_date, pair_to_change=self, is_canceled=True)
+        return cancel
+
+
 
