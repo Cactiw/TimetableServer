@@ -36,7 +36,8 @@ def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutW
     return result
 
 
-def get_teacher_pairs(user: User, db: Session = Depends(get_db)) -> List[PairOutWithChangesModel]:
+@app.get("/pairs/teacher", response_model=List[PairOutWithChangesModel])
+def get_teacher_pairs(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> List[PairOutWithChangesModel]:
     return db.query(Pair).filter(Pair.teacher == user, not_(Pair.is_canceled.is_(True))).all()
 
 
