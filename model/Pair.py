@@ -42,6 +42,7 @@ class PairOutModel(PairModel):
 
 class PairOutWithChangesModel(PairOutModel):
     changes: Optional[List['PairOutModel']] = []
+    pair_to_change: Optional[PairOutModel]
 
 
 class Pair(Base):
