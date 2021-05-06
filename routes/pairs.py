@@ -2,6 +2,7 @@
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from sqlalchemy.sql import and_, not_
 from sqlalchemy.orm import Session
 
 from model.Pair import Pair, PairOutModel, PairOutWithChangesModel
@@ -30,7 +31,7 @@ def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutM
     group: PeopleUnion = db.query(PeopleUnion).get(group_id)
     result = []
     while group is not None:
-        result += db.query(Pair).filter_by(group_id=group.id).all()
+        result += db.query(Pair).filter(Pair.group_id == group.id, not_(Pair.is_canceled.is_(True))).all()
         group = group.parent
     return result
 
