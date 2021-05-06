@@ -27,7 +27,7 @@ def get_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel
 
 
 @app.get("/pairs/by_group/all/{group_id}", response_model=List[PairOutWithChangesModel])
-def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutModel]:
+def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutWithChangesModel]:
     group: PeopleUnion = db.query(PeopleUnion).get(group_id)
     result = []
     while group is not None:
@@ -36,10 +36,14 @@ def get_all_pairs(group_id: int, db: Session = Depends(get_db)) -> List[PairOutM
     return result
 
 
+def get_teacher_pairs(user: User, db: Session = Depends(get_db)) -> List[PairOutWithChangesModel]:
+    return db.query(Pair).filter(Pair.teacher == user, not_(Pair.is_canceled.is_(True))).all()
+
+
 @app.get("/pairs/timetable", response_model=List[PairOutWithChangesModel])
 def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role == user.STUDENT:
         return get_all_pairs(user.group_id, db)
     elif user.role == user.TEACHER:
-        raise NotImplemented
+        return get_teacher_pairs(user, db)
 
