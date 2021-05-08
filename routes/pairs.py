@@ -1,7 +1,7 @@
 
 from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from sqlalchemy.sql import and_, not_
 from sqlalchemy.orm import Session
 
@@ -67,6 +67,12 @@ def cancel_pair(model: CancelPairModel,
         db.delete(pair)
         db.commit()
         return {"ok": True, "result": "Cancel change deleted!"}
+    current_changes = list(filter(lambda change: change.change_date == model.pair_date and change.is_canceled,
+                                  pair.changes))
+    if current_changes:
+        db.delete(current_changes[0])
+        db.commit()
+        return Response({"ok": True, "result": "Class cancellation canceled!", "cancel_data": None}, status_code=205)
     cancel = pair.cancel_pair(model.pair_date)
     db.add(cancel)
     db.commit()

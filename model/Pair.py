@@ -74,7 +74,8 @@ class Pair(Base):
 
     auditorium = relationship('Auditorium')
     group = relationship('PeopleUnion')
-    pair_to_change = relationship('Pair', remote_side=[id], backref="changes")
+    pair_to_change = relationship('Pair', remote_side=[id], back_populates="changes")
+    changes: List['Pair'] = relationship('Pair')
     teacher = relationship('User')
 
     @property
