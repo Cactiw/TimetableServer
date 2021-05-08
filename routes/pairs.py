@@ -52,7 +52,7 @@ def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_curren
 
 
 @app.post("/pairs/cancel", response_model=CancelPairResponseModel)
-def cancel_pair(model: CancelPairModel,
+def cancel_pair(model: CancelPairModel, response: Response,
                 db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role not in frozenset({user.TEACHER, user.OPERATOR}):
         raise HTTPException(403, {"error": "This methods requires additional rights."})
@@ -72,7 +72,8 @@ def cancel_pair(model: CancelPairModel,
     if current_changes:
         db.delete(current_changes[0])
         db.commit()
-        return Response({"ok": True, "result": "Class cancellation canceled!", "cancel_data": None}, status_code=205)
+        response.status_code = 205
+        return {"ok": True, "result": "Class cancellation canceled!", "cancel_data": None}
     cancel = pair.cancel_pair(model.pair_date)
     db.add(cancel)
     db.commit()
