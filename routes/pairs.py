@@ -72,7 +72,7 @@ def cancel_pair(model: CancelPairModel, response: Response,
     if current_changes:
         db.delete(current_changes[0])
         db.commit()
-        response.status_code = 205
+        response.status_code = 200
         return {"ok": True, "result": "Class cancellation canceled!", "cancel_data": None}
     cancel = pair.cancel_pair(model.pair_date)
     db.add(cancel)
