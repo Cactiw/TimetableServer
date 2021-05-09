@@ -34,7 +34,7 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException):
 
 
 async def generate_token(model: LoginUserModel, db: Session = Depends(get_db), auth: AuthJWT = Depends()) -> (str, User):
-    user: Optional[User] = await authenticate_user(email=model.email, password=model.password, db=db)
+    user: Optional[User] = await authenticate_user(email=model.email.lower(), password=model.password, db=db)
     return auth.create_access_token(subject=user.id, expires_time=datetime.timedelta(days=30)), user
 
 
