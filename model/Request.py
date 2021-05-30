@@ -32,6 +32,11 @@ class RequestInModel(RequestModel):
     request_pair_id: int
 
 
+class RequestResolveModel(BaseModel):
+    request_id: int
+    auditorium_id: int
+
+
 class RequestOutModel(RequestModel):
     auditorium: Optional[AuditoriumOutModel]
     request_pair: PairOutModel
