@@ -53,7 +53,8 @@ def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_curren
 
 @app.post("/pairs/cancel", response_model=CancelPairResponseModel)
 def cancel_pair(model: CancelPairModel, response: Response,
-                db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+                db: Session = Depends(get_db), user: User = Depends(get_current_user),
+                delete_canceled: bool = True):
     if user.role not in frozenset({user.TEACHER, user.OPERATOR}):
         raise HTTPException(403, {"error": "This methods requires additional rights."})
     pair: Pair = db.query(Pair).get(model.pair_id)
@@ -64,12 +65,16 @@ def cancel_pair(model: CancelPairModel, response: Response,
     if pair.begin_time.weekday() != model.pair_date.weekday():
         raise HTTPException(409, {"error": "Cancel date do not match pair date."})
     if pair.is_canceled:
+        if not delete_canceled:
+            return {"ok": True, "result": "Already canceled!", "cancel_data": pair}
         db.delete(pair)
         db.commit()
         return {"ok": True, "result": "Cancel change deleted!"}
     current_changes = list(filter(lambda change: change.change_date == model.pair_date and change.is_canceled,
                                   pair.changes))
     if current_changes:
+        if not delete_canceled:
+            return {"ok": True, "result": "Already canceled!", "cancel_data": current_changes[0]}
         db.delete(current_changes[0])
         db.commit()
         response.status_code = 200

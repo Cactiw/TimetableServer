@@ -11,10 +11,11 @@ from model.Auditorium import Auditorium
 
 from routes.user import generate_token
 from routes.pairs import get_pairs
+from routes.requests import create_request
 
 from service.parser import parse_xls
 
-from database import get_db
+from database import get_db, Base, engine
 from service.globals import app
 
 import uvicorn
@@ -29,5 +30,10 @@ async def parseXls(request: Request):
     return {"result": "ok", "code": 200, "timetable": result}
 
 
+def init_db():
+    Base.metadata.create_all(engine)
+
+
 if __name__ == "__main__":
+    init_db()
     uvicorn.run("app:app", host="0.0.0.0", port=6000, log_level="info")
