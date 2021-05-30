@@ -6,3 +6,4 @@ fastapi-jwt-auth
 passlib
 bcrypt
 python-jose
+requests

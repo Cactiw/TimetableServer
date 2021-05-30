@@ -12,8 +12,9 @@ from model.Auditorium import Auditorium
 
 from database import get_db
 from service.auth import get_current_user
+from service.telegram_service import send_notify
 
-from service.globals import app
+from service.globals import app, NOTIFY_ID
 
 import datetime
 
@@ -82,5 +83,10 @@ def cancel_pair(model: CancelPairModel, response: Response,
     cancel = pair.cancel_pair(model.pair_date)
     db.add(cancel)
     db.commit()
+    if delete_canceled:
+        send_notify(NOTIFY_ID, "Занятие \"<b>{}</b>\" {} не состоится и будет перенесено.".format(
+            cancel.subject, cancel.russian_begin_time
+        ))
+
     return {"ok": True, "result": "Class canceled!", "cancel_data": cancel}
 

@@ -14,6 +14,8 @@ from model.User import UserOutModel
 from model.Auditorium import AuditoriumOutModel
 from model.PeopleUnion import PeopleUnionOutModel
 
+from service.globals import MONTHS
+
 
 metadata = Base.metadata
 
@@ -89,6 +91,10 @@ class Pair(Base):
     @property
     def end_clear_time(self) -> str:
         return self.end_time.strftime("%H:%M")
+
+    @property
+    def russian_begin_time(self) -> str:
+        return "{} {} в {}".format(self.begin_time.day, MONTHS[self.begin_time.month], self.begin_clear_time)
 
     def cancel_pair(self, cancel_date: datetime.date) -> 'Pair':
         cancel = Pair(begin_time=datetime.datetime.combine(cancel_date, self.begin_time.time()), end_time=self.end_time,
