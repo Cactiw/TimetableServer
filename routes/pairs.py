@@ -84,7 +84,7 @@ def cancel_pair(model: CancelPairModel, response: Response,
     db.add(cancel)
     db.commit()
     if delete_canceled:
-        send_notify(NOTIFY_ID, "Занятие \"<b>{}</b>\" {} не состоится и будет перенесено.".format(
+        send_notify(NOTIFY_ID, "Занятие \"<b>{}</b>\" {} отменено".format(
             cancel.subject, cancel.russian_begin_time
         ))
 
