@@ -55,8 +55,8 @@ class Request(Base):
     new_end_time = Column(DateTime)
 
     auditorium_id = Column(Integer, ForeignKey("auditorium.id"))
-    request_pair_id = Column(Integer, ForeignKey("pair.id"))
-    change_pair_id = Column(Integer, ForeignKey("pair.id"))
+    request_pair_id = Column(Integer, ForeignKey("pair.id", ondelete="SET NULL"))
+    change_pair_id = Column(Integer, ForeignKey("pair.id", ondelete="CASCADE"))
     change_date = Column(Date)
 
     auditorium = relationship("Auditorium")
