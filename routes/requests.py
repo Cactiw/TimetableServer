@@ -62,7 +62,9 @@ def resolve_request(model: RequestResolveModel, db: Session = Depends(get_db)):
     db.commit()
 
     send_notify(NOTIFY_ID, "Занятие \"<b>{}</b>\" {} перенесено на {}.".format(
-        change.subject, change.pair_to_change.russian_begin_time, change.russian_begin_time
+        change.subject,
+        Pair.format_datetime(datetime.datetime.combine(change.change_date, change.pair_to_change.begin_time.time())),
+        change.russian_begin_time
     ))
 
     return {"ok": True, "result": "Request resolved!"}

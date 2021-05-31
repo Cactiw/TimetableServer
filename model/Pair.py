@@ -94,7 +94,11 @@ class Pair(Base):
 
     @property
     def russian_begin_time(self) -> str:
-        return "{} {} в {}".format(self.begin_time.day, MONTHS[self.begin_time.month], self.begin_clear_time)
+        return "{} {} в {}".format(self.begin_time.day, MONTHS[self.begin_time.month - 1], self.begin_clear_time)
+
+    @classmethod
+    def format_datetime(cls, datetime):
+        return "{} {} в {}".format(datetime.day, MONTHS[datetime.month - 1], datetime.strftime("%H:%M"))
 
     def cancel_pair(self, cancel_date: datetime.date) -> 'Pair':
         cancel = Pair(begin_time=datetime.datetime.combine(cancel_date, self.begin_time.time()), end_time=self.end_time,
