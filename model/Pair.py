@@ -33,6 +33,7 @@ class PairOutModel(PairModel):
     id: int
     teacher: Optional[UserOutModel]
     auditorium: Optional[AuditoriumOutModel]
+    is_online: bool
     group: PeopleUnionOutModel
     day_of_week: int
     begin_clear_time: str
@@ -73,6 +74,7 @@ class Pair(Base):
     pair_time_pattern = Column(String(255))
     is_canceled = Column(BOOLEAN)
     change_date = Column(Date)
+    is_online = Column(BOOLEAN, nullable=False, default=False)
 
     auditorium = relationship('Auditorium')
     group = relationship('PeopleUnion')
