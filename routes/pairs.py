@@ -90,3 +90,32 @@ def cancel_pair(model: CancelPairModel, response: Response,
 
     return {"ok": True, "result": "Class canceled!", "cancel_data": cancel}
 
+
+@app.post("/pairs/makeOnline", response_model=CancelPairResponseModel)
+def make_pair_online(model: CancelPairModel, response: Response,
+                     db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if user.role not in frozenset({user.TEACHER, user.OPERATOR}):
+        raise HTTPException(403, {"error": "This methods requires additional rights."})
+    pair: Pair = db.query(Pair).get(model.pair_id)
+    if not pair:
+        raise HTTPException(404, {"error": "Pair not found."})
+    if user.role == user.TEACHER and pair.teacher != user:
+        raise HTTPException(403, {"error": "You can not cancel a class that isn't yours."})
+    if pair.begin_time.weekday() != model.pair_date.weekday():
+        raise HTTPException(409, {"error": "Cancel date do not match pair date."})
+    if pair.is_online:
+        return {"ok": True, "result": "Already online!", "cancel_data": pair}
+    current_changes = list(filter(lambda change: change.change_date == model.pair_date and change.is_online,
+                                  pair.changes))
+    if current_changes:
+        return {"ok": True, "result": "Already canceled!", "cancel_data": current_changes[0]}
+    online = pair.make_pair_online(model.pair_date)
+    db.add(online)
+    db.commit()
+
+    send_notify(NOTIFY_ID, "Занятие \"<b>{}</b>\" {} перенесено на дистанционку.".format(
+        online.subject, online.russian_begin_time
+    ))
+
+    return {"ok": True, "result": "Class canceled!", "online_data": online}
+

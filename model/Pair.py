@@ -108,5 +108,11 @@ class Pair(Base):
                       change_date=cancel_date, pair_to_change=self, is_canceled=True)
         return cancel
 
+    def make_pair_online(self, cancel_date: datetime.date) -> 'Pair':
+        cancel = Pair(begin_time=datetime.datetime.combine(cancel_date, self.begin_time.time()), end_time=self.end_time,
+                      subject=self.subject, auditorium=self.auditorium, teacher=self.teacher, group=self.group,
+                      change_date=cancel_date, pair_to_change=self, is_online=True)
+        return cancel
+
 
 
