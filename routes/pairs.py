@@ -12,6 +12,7 @@ from model.Auditorium import Auditorium
 
 from database import get_db
 from service.auth import get_current_user
+from service.optimization import count_timetable_score
 from service.telegram_service import send_notify
 
 from service.globals import app, NOTIFY_ID
@@ -22,6 +23,11 @@ import datetime
 @app.get("/pairs")
 def get_pairs(db: Session = Depends(get_db)):
     return db.query(Pair).all()
+
+
+@app.get("/pairs/count_score")
+def get_pairs(db: Session = Depends(get_db)):
+    return count_timetable_score(db)
 
 
 @app.get("/pairs/by_group/{group_id}", response_model=List[PairOutWithChangesModel])

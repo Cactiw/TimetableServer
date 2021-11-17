@@ -1,6 +1,6 @@
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 
 from pydantic import BaseModel
 
@@ -33,7 +33,14 @@ class PeopleUnion(Base):
     parent_id = Column(ForeignKey('people_union.id'))
     type_id = Column(ForeignKey('people_union_type.id'))
 
-    parent = relationship('PeopleUnion', remote_side=[id])
+    parent = relationship('PeopleUnion', remote_side=[id], backref='children')
     type = relationship('PeopleUnionType')
     users = relationship('User', secondary='people_union_users')
+
+    def get_all_users(self):
+        users = self.users
+        if not self.children:
+            return users
+        for child in self.children:
+            users.extend(child.get_all_users())
 
