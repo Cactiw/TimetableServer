@@ -48,6 +48,11 @@ class PairOutWithChangesModel(PairOutModel):
     pair_to_change: Optional[PairOutModel]
 
 
+class TimetableAdminOut(BaseModel):
+    timetable: List[PairOutWithChangesModel]
+    groups: List[PeopleUnionOutModel]
+
+
 class CancelPairModel(BaseModel):
     pair_id: int
     pair_date: datetime.date
@@ -76,7 +81,7 @@ class Pair(Base):
     change_date = Column(Date)
     is_online = Column(BOOLEAN, nullable=False, default=False)
 
-    auditorium = relationship('Auditorium')
+    auditorium = relationship('Auditorium', back_populates="pairs")
     group = relationship('PeopleUnion')
     pair_to_change = relationship('Pair', remote_side=[id], back_populates="changes")
     changes: List['Pair'] = relationship('Pair')

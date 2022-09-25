@@ -4,8 +4,10 @@ from typing import List, Optional
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from sqlalchemy.sql import and_, not_
 from sqlalchemy.orm import Session
+from sqlalchemy.testing import in_
 
-from model.Pair import Pair, PairOutModel, PairOutWithChangesModel, CancelPairModel, CancelPairResponseModel
+from model.Pair import Pair, PairOutModel, PairOutWithChangesModel, CancelPairModel, CancelPairResponseModel, \
+    TimetableAdminOut
 from model.PeopleUnion import PeopleUnion
 from model.User import User
 from model.Auditorium import Auditorium
@@ -56,6 +58,22 @@ def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_curren
         return get_all_pairs(user.group_id, db)
     elif user.role == user.TEACHER:
         return get_teacher_pairs(user, db)
+
+
+@app.get("/pairs/timetableAdmin", response_model=TimetableAdminOut)
+def get_admin_timetable(thread_group_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if user.role != user.OPERATOR:
+        raise HTTPException(403, {"error": "This methods requires additional rights."})
+    thread = db.query(PeopleUnion).get(thread_group_id)
+    if thread is None:
+        raise HTTPException(404, {"error": "Thread not found"})
+    group_ids = list(map(lambda g: g.id, [thread, thread.parent, *thread.children]))
+    pairs = db.query(Pair).filter(and_(Pair.group_id.in_(group_ids), Pair.repeatability > 0)).all()
+    return TimetableAdminOut(
+        timetable=sorted(pairs, key=lambda p: (p.day_of_week, p.begin_clear_time)), groups=list(
+            sorted(thread.children, key=lambda g: g.name)
+        )
+    )
 
 
 @app.post("/pairs/cancel", response_model=CancelPairResponseModel)

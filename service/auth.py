@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Depends, Request, HTTPException
 from fastapi_jwt_auth.exceptions import AuthJWTException
@@ -18,6 +18,7 @@ from service.globals import app
 
 class AuthSettings(BaseModel):
     authjwt_secret_key: str = JWT_SECRET
+    authjwt_token_location: List[str] = ['cookies', 'headers']
 
 
 @AuthJWT.load_config
