@@ -1,3 +1,4 @@
+import enum
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, JSON, String, Table, text, Date, BOOLEAN, Sequence
 from sqlalchemy.orm import relationship
@@ -18,6 +19,11 @@ from service.globals import MONTHS
 
 
 metadata = Base.metadata
+
+
+class PairRepeatability(int, enum.Enum):
+    ONCE = 0
+    EVERY_WEEK = 1
 
 
 class PairModel(BaseModel):
@@ -64,6 +70,25 @@ class CancelPairResponseModel(BaseModel):
     cancel_data: Optional[PairOutWithChangesModel]
 
 
+class CheckConflictsInModel(BaseModel):
+    auditorium_id: int
+    teacher_id: int
+    group_id: int
+    date: datetime.date
+    begin_time: int
+    end_time: int
+
+    pair_id: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+
+class CreatePairModel(CheckConflictsInModel):
+    subject: str
+    repeatability: PairRepeatability
+
+
 class Pair(Base):
     __tablename__ = 'pair'
 
@@ -77,7 +102,7 @@ class Pair(Base):
     teacher_id = Column(ForeignKey('users.id'))
     group_id = Column(ForeignKey('people_union.id'))
     pair_time_pattern = Column(String(255))
-    is_canceled = Column(BOOLEAN)
+    is_canceled = Column(BOOLEAN, default=False)
     change_date = Column(Date)
     is_online = Column(BOOLEAN, nullable=False, default=False)
 
@@ -102,6 +127,13 @@ class Pair(Base):
     @property
     def russian_begin_time(self) -> str:
         return "{} {} в {}".format(self.begin_time.day, MONTHS[self.begin_time.month - 1], self.begin_clear_time)
+
+    def check_intersection(self, other: 'Pair') -> bool:
+        if self.id == other.id and self.id is not None:
+            return False
+        return self.day_of_week == other.day_of_week and not (
+            self.begin_time.time() > other.end_time.time() or self.end_time.time() < self.begin_time.time()
+        )
 
     @classmethod
     def format_datetime(cls, datetime):

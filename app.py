@@ -13,6 +13,7 @@ from routes.user import generate_token
 from routes.pairs import get_pairs
 from routes.requests import create_request
 from routes.auditoriums import get_auditoriums
+from routes.groups import search_group
 
 from service.parser import parse_xls
 

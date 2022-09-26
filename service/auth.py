@@ -52,3 +52,10 @@ async def get_current_user(auth: AuthJWT = Depends(), db: Session = Depends(get_
     auth.jwt_required()
     current_user = db.query(User).get(auth.get_jwt_subject())
     return current_user
+
+
+async def get_current_operator_user(auth: AuthJWT = Depends(), db: Session = Depends(get_db),
+                                    user=Depends(get_current_user)) -> Optional[User]:
+    if user.role != user.OPERATOR:
+        raise HTTPException(403, "Additional rights required!")
+    return user

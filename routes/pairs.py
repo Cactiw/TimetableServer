@@ -1,4 +1,4 @@
-
+import enum
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -7,13 +7,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy.testing import in_
 
 from model.Pair import Pair, PairOutModel, PairOutWithChangesModel, CancelPairModel, CancelPairResponseModel, \
-    TimetableAdminOut
+    TimetableAdminOut, CheckConflictsInModel, CreatePairModel
 from model.PeopleUnion import PeopleUnion
 from model.User import User
 from model.Auditorium import Auditorium
 
 from database import get_db
-from service.auth import get_current_user
+from service.auth import get_current_user, get_current_operator_user
 from service.optimization import count_timetable_score
 from service.telegram_service import send_notify
 
@@ -142,4 +142,71 @@ def make_pair_online(model: CancelPairModel, response: Response,
     ))
 
     return {"ok": True, "result": "Class canceled!", "online_data": online}
+
+
+class ConflictType(str, enum.Enum):
+    TEACHER = 'Teacher'
+    AUDITORIUM = 'Auditorium'
+    GROUP = 'Group'
+
+
+@app.post("/pairs/checkConflicts")
+async def check_conflicts(model: CheckConflictsInModel, db: Session = Depends(get_db),
+                          user: User = Depends(get_current_operator_user)):
+    conflicts = []
+    model.begin_time = datetime.datetime.fromtimestamp(model.begin_time // 1000).time()
+    model.end_time = datetime.datetime.fromtimestamp(model.end_time // 1000).time()
+    model.date += datetime.timedelta(days=1)
+    check_pair = Pair(id=model.pair_id, begin_time=datetime.datetime.combine(model.date, model.begin_time),
+                      end_time=datetime.datetime.combine(model.date, model.end_time))
+    default_teacher_pairs = db.query(Pair).filter(and_(Pair.teacher_id == model.teacher_id, Pair.repeatability > 0)).all()
+    for pair in default_teacher_pairs:
+        if check_pair.check_intersection(pair):
+            conflicts.append({'type': ConflictType.TEACHER, 'info': f'{pair.subject} - {pair.begin_time} - {pair.auditorium.name}'})
+            break
+
+    group = db.query(PeopleUnion).get(model.group_id)
+    group_ids = []
+    while group is not None:
+        group_ids.append(group.id)
+        group = group.parent
+
+    default_group_pairs = db.query(Pair).filter(and_(Pair.group_id.in_(group_ids), Pair.repeatability > 0)).all()
+    for pair in default_group_pairs:
+        if check_pair.check_intersection(pair):
+            conflicts.append({'type': ConflictType.GROUP, 'info': f'{pair.subject} - {pair.begin_time} - {pair.auditorium.name if pair.auditorium else ""}'})
+            break
+
+    default_group_auditorium = db.query(Pair).filter(and_(Pair.auditorium_id == model.auditorium_id, Pair.repeatability > 0)).all()
+    for pair in default_group_auditorium:
+        if check_pair.check_intersection(pair):
+            conflicts.append({'type': ConflictType.AUDITORIUM, 'info': f'{pair.subject} - {pair.begin_time} - {pair.auditorium.name}'})
+            break
+    return {
+        "has_conflicts": bool(conflicts),
+        "conflicts": conflicts
+    }
+
+
+@app.post("/pairs/", response_model=PairOutModel)
+async def create_pair(model: CreatePairModel, db: Session = Depends(get_db),
+                      user: User = Depends(get_current_operator_user)):
+    model.begin_time = datetime.datetime.fromtimestamp(model.begin_time // 1000).time()
+    model.end_time = datetime.datetime.fromtimestamp(model.end_time // 1000).time()
+    model.date += datetime.timedelta(days=1)
+    pair = Pair(
+        begin_time=datetime.datetime.combine(model.date, model.begin_time),
+        end_time=datetime.datetime.combine(model.date, model.end_time),
+        repeatability=model.repeatability,
+        subject=model.subject,
+        auditorium_id=model.auditorium_id,
+        pair_to_change_id=None,
+        teacher_id=model.teacher_id,
+        group_id=model.group_id,
+        is_canceled=False
+    )
+    db.add(pair)
+    db.commit()
+    return pair
+
 
