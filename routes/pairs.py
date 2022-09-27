@@ -61,7 +61,7 @@ def get_timetable(db: Session = Depends(get_db), user: User = Depends(get_curren
 
 
 @app.get("/pairs/timetableAdmin", response_model=TimetableAdminOut)
-def get_admin_timetable(thread_group_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_admin_timetable(thread_group_id: int, week_start: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role != user.OPERATOR:
         raise HTTPException(403, {"error": "This methods requires additional rights."})
     thread = db.query(PeopleUnion).get(thread_group_id)
