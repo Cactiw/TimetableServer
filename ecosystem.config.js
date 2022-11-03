@@ -2,7 +2,7 @@ module.exports = {
   apps : [{
     name: 'TimetableServer',
     script: 'app.py',
-    interpreter: 'python3',
+    interpreter: './venv/bin/python3',
     log_file: 'timetable_server.log',
     min_uptime: 5000,
     kill_timeout: 15000,
