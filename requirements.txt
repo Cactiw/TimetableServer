@@ -1,5 +1,6 @@
 fastapi
 sqlalchemy
+psycopg2-binary @ https://test-files.pythonhosted.org/packages/be/5f/c3c829beda843fc6c75ccd0b428a9ee04346400adc7d269709fd536c22ce/psycopg2_binary-2.9.3-cp39-cp39-macosx_11_0_arm64.whl ; platform_system == 'Darwin' and platform_machine == 'arm64' and python_version == '3.9'
 uvicorn
 python-multipart
 fastapi-jwt-auth
@@ -7,3 +8,5 @@ passlib
 bcrypt
 python-jose
 requests
+xlrd
+natty

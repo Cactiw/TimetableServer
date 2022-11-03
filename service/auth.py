@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Depends, Request, HTTPException
 from fastapi_jwt_auth.exceptions import AuthJWTException
@@ -18,6 +18,7 @@ from service.globals import app
 
 class AuthSettings(BaseModel):
     authjwt_secret_key: str = JWT_SECRET
+    authjwt_token_location: List[str] = ['cookies', 'headers']
 
 
 @AuthJWT.load_config
@@ -51,3 +52,10 @@ async def get_current_user(auth: AuthJWT = Depends(), db: Session = Depends(get_
     auth.jwt_required()
     current_user = db.query(User).get(auth.get_jwt_subject())
     return current_user
+
+
+async def get_current_operator_user(auth: AuthJWT = Depends(), db: Session = Depends(get_db),
+                                    user=Depends(get_current_user)) -> Optional[User]:
+    if user.role != user.OPERATOR:
+        raise HTTPException(403, "Additional rights required!")
+    return user
